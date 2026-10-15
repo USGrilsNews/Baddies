@@ -54,7 +54,7 @@ body{
   box-shadow:0 18px 50px rgba(0,0,0,.42),0 0 32px rgba(155,92,255,.10)
 }
 .photo-box{position:relative;width:100%;background:#05040a;overflow:hidden;isolation:isolate}
-#videoPoster{width:100%;display:block;max-height:75vh;object-fit:cover;background:#05040a;transition:transform .6s ease,filter .4s ease}
+#videoPoster{width:100%;display:block;max-height:75vh;object-fit:cover;background:#05040a;visibility:hidden;transition:transform .6s ease,filter .4s ease}
 .photo-box:hover #videoPoster{transform:scale(1.025);filter:saturate(1.08)}
 .photo-loading{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at center,rgba(81,30,108,.98),#080713 72%);transition:opacity .3s ease,visibility .3s ease}
 .photo-loading.hide{opacity:0;visibility:hidden}
@@ -135,7 +135,7 @@ body{
     <!-- FOTO -->
     <div class="photo-box">
 
-      <!-- LOADING 1 DETIK -->
+      <!-- LOADING MINIMAL 3 DETIK -->
       <div class="photo-loading" id="photoLoading">
         <div class="loading-logo"></div>
         <div class="loading-text">LOADING...</div>
@@ -155,7 +155,7 @@ body{
          rel="noopener noreferrer"
          aria-label="Watch full video">
         <span class="play-button" aria-hidden="true">▶</span>
-        <span class="play-hint">▶ WATCH FULL VIDEO</span>
+        <span class="play-hint">▶WATCH CLICK</span>
       </a>
 
     </div>
@@ -163,8 +163,8 @@ body{
     <!-- LIKE & VIEWS: angka awal bisa diatur di konfigurasi JavaScript bawah --> 
     <div class="engagement-bar">
       <div class="engagement-stats">
-        <div class="engagement-item"><span class="stat-icon">👁</span><span id="viewCount">357.8K</span><span>views</span></div>
-        <div class="engagement-item"><span class="stat-icon">♥</span><span id="likeCount">93.4K</span><span>likes</span></div>
+        <div class="engagement-item"><span class="stat-icon">👁</span><span id="viewCount">975.8K</span><span>views</span></div>
+        <div class="engagement-item"><span class="stat-icon">♥</span><span id="likeCount">75.4K</span><span>likes</span></div>
       </div>
       <button class="like-button" id="likeButton" type="button" aria-pressed="false">♡ Like</button>
     </div>
@@ -238,25 +238,43 @@ body{
 
   if(!poster) return;
 
-  /* Sembunyikan foto saat loading */
+  /* Foto tidak ditampilkan sebelum loading selesai */
   poster.style.visibility = "hidden";
 
-  /* Tampilkan foto setelah 1 detik */
-  setTimeout(function(){
+  /* Tampilkan foto setelah minimal 3 detik DAN gambar sudah selesai dimuat */
+  const loadingStartedAt = Date.now();
+  let imageReady = poster.complete && poster.naturalWidth > 0;
+  let minimumDelayPassed = false;
+  let revealed = false;
 
+  function revealPhotoWhenReady(){
+    if(revealed || !imageReady || !minimumDelayPassed) return;
+    revealed = true;
     poster.style.visibility = "visible";
-
     if(loading){
-
       loading.classList.add("hide");
-
-      setTimeout(function(){
-        loading.remove();
-      },300);
-
+      setTimeout(function(){ loading.remove(); },300);
     }
+  }
 
-  },1000);
+  poster.addEventListener("load", function(){
+    imageReady = true;
+    revealPhotoWhenReady();
+  }, { once:true });
+
+  poster.addEventListener("error", function(){
+    /* Jika gambar gagal dimuat, hilangkan overlay setelah 3 detik agar halaman tidak macet */
+    imageReady = true;
+    revealPhotoWhenReady();
+  }, { once:true });
+
+  setTimeout(function(){
+    minimumDelayPassed = true;
+    revealPhotoWhenReady();
+  }, Math.max(0, 3000 - (Date.now() - loadingStartedAt)));
+
+  /* Jika gambar sudah ada di cache, tetap tunggu sampai 3 detik selesai */
+  revealPhotoWhenReady();
 
 
   /* Disable klik kanan pada foto */
