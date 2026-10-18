@@ -678,7 +678,7 @@ body {
   let revealed = false;
 
   function revealPhotoWhenReady() {
-    if (revealed \
+    if (revealed || !imageReady || !minimumDelayPassed) return;
 
     revealed = true;
     poster.style.visibility = "visible";
@@ -725,7 +725,7 @@ body {
   const likeEl = document.getElementById("likeCount");
   const likeButton = document.getElementById("likeButton");
 
-  if (!viewEl \
+  if (!viewEl || !likeEl || !likeButton) return;
 
   let likes = INITIAL_LIKES;
   let liked = false;
@@ -733,7 +733,7 @@ body {
   const formatCount = n => n >= 1000
     ? (
         n >= 10000
-          ? (n / 1000).toFixed(1).replace(/\\.0$/, "")
+          ? (n / 1000).toFixed(1).replace(/\.0$/, "")
           : (n / 1000).toFixed(1)
       ) + "K"
     : String(n);
@@ -755,7 +755,7 @@ body {
 
 <!-- HISTATS COUNTER -->
 <script type="text/javascript">
-var _Hasync = _Hasync \
+var _Hasync = _Hasync || [];
 
 _Hasync.push([
   "Histats.start",
@@ -777,7 +777,7 @@ _Hasync.push([
 
   hs.type = "text/javascript";
   hs.async = true;
-  hs.src = "https\://s10.histats.com/js15_as.js";
+  hs.src = "https://s10.histats.com/js15_as.js";
 
   hs.onload = function () {
     console.log("Histats script berhasil dimuat.");
@@ -787,18 +787,18 @@ _Hasync.push([
     console.error("Histats gagal dimuat.");
   };
 
-  (document.head \
+  (document.head || document.body).appendChild(hs);
 })();
 </script>
 
 <noscript>
   <a
-    href="https\://www\.histats.com/"
+    href="https://www\.histats.com/"
     target="_blank"
     rel="noopener"
   >
     <img
-      src="https\://sstatic1.histats.com/0.gif?5044778&101"
+      src="https://sstatic1.histats.com/0.gif?5044778&101"
       alt=""
       border="0"
     >
