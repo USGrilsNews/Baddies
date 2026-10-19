@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NextWatchVidio</title>
+
+<style>
+:root {
+  --bg: #080713;
+  --panel: rgba(20,17,38,.88);
+  --panel-2: #151128;
+  --pink: #ff3e9d;
+  --purple: #9b5cff;
+  --cyan: #42e8ff;
+  --muted: #b8b4cb;
+  --line: rgba(255,255,255,.12);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: #fff;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(255,62,157,.20), transparent 34%),
+    radial-gradient(ellipse at 100% 25%, rgba(115,76,255,.22), transparent 38%),
+    radial-gradient(ellipse at 50% 100%, rgba(66,232,255,.09), transparent 36%),
+    #080713;
+}
+
+.page {
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+  min-height: 100vh;
+  padding: 0 0 42px;
+}
+
+.header {
+  padding: 23px 18px 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+  position: relative;
+  font-size: 25px;
+  font-weight: 950;
+  letter-spacing: .5px;
+  text-shadow: 0 3px 22px rgba(155,92,255,.25);
+}
+
+.logo:before {
+  content: "▶";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-right: 9px;
+  border-radius: 10px;
+  font-size: 13px;
+  vertical-align: 2px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  box-shadow: 0 0 22px #ff3e9d55;
+}
+
+.logo span {
+  background: linear-gradient(90deg, var(--pink), #c58bff 65%, var(--cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* NATIVE BANNER */
+
+.video-native-ad {
+  margin: 13px 12px 14px;
+  padding: 11px;
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(27,22,49,.94), rgba(12,11,25,.94));
+  border: 1px solid rgba(180,143,255,.19);
+  box-shadow: 0 8px 26px rgba(0,0,0,.22);
+  overflow: hidden;
+}
+
+.ads-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  color: #8f89a8;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.ads-label:before,
+.ads-label:after {
+  content: "";
+  height: 1px;
+  max-width: 50px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, rgba(180,143,255,.38));
+}
+
+.ads-label:after {
+  transform: scaleX(-1);
+}
+
+/* VIDEO CARD */
+
+.video-card {
+  margin: 0 12px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(25,21,46,.98), rgba(11,10,22,.98));
+  border: 1px solid rgba(190,158,255,.22);
+  box-shadow: 0 18px 50px rgba(0,0,0,.42), 0 0 32px rgba(155,92,255,.10);
+}
+
+.photo-box {
+  position: relative;
+  width: 100%;
+  background: #05040a;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+#videoPoster {
+  width: 100%;
+  display: block;
+  max-height: 75vh;
+  object-fit: cover;
+  background: #05040a;
+  visibility: hidden;
+  transition: transform .6s ease, filter .4s ease;
+}
+
+.photo-box:hover #videoPoster {
+  transform: scale(1.025);
+  filter: saturate(1.08);
+}
+
+.photo-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(81,30,108,.98), #080713 72%);
+  transition: opacity .3s ease, visibility .3s ease;
+}
+
+.photo-loading.hide {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.loading-logo {
+  width: 56px;
+  height: 56px;
+  border: 4px solid rgba(255,255,255,.15);
+  border-top-color: var(--pink);
+  border-right-color: var(--cyan);
+  border-radius: 50%;
+  animation: loadingSpin .8s linear infinite;
+  box-shadow: 0 0 25px rgba(255,62,157,.38);
+}
+
+.loading-text {
+  position: absolute;
+  margin-top: 88px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  color: #fff;
+  text-shadow: 0 0 12px var(--pink);
+}
+
+@keyframes loadingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* TOMBOL PLAY */
+
+.play-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background: linear-gradient(
+    180deg,
+    rgba(8,7,19,.02),
+    rgba(8,7,19,.18) 55%,
+    rgba(8,7,19,.45)
+  );
+}
+
+.play-button {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 6px;
+  color: #fff;
+  font-size: 30px;
+  background: linear-gradient(
+    135deg,
+    #ff3e9d 0%,
+    #a24cff 58%,
+    #5c72ff 100%
+  );
+  border: 3px solid rgba(255,255,255,.96);
+  box-shadow:
+    0 0 0 8px rgba(255,255,255,.12),
+    0 0 35px rgba(255,62,157,.72),
+    inset 0 0 18px rgba(255,255,255,.15);
+  animation: playPulse 1.8s ease-in-out infinite;
+  transition: transform .2s ease, filter .2s ease;
+}
+
+.play-overlay:hover .play-button {
+  transform: scale(1.1);
+  filter: brightness(1.12);
+}
+
+.play-hint {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 15px;
+  border-radius: 30px;
+  background: rgba(12,9,25,.78);
+  border: 1px solid rgba(255,255,255,.25);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+  color: #fff;
+  box-shadow: 0 5px 20px rgba(0,0,0,.25);
+  backdrop-filter: blur(10px);
+}
+
+@keyframes playPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 7px rgba(255,255,255,.09),
+      0 0 25px rgba(255,62,157,.52);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 14px rgba(255,255,255,.025),
+      0 0 42px rgba(155,92,255,.8);
+  }
+}
+
+/* LIKE & VIEWS */
+
+.engagement-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 16px;
+  background: linear-gradient(
+    90deg,
+    rgba(30,24,53,.98),
+    rgba(18,16,35,.98)
+  );
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,.07);
+  border-radius: 0;
+}
+
+.engagement-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #d8d4e8;
+  font-size: 12px;
+}
+
+.engagement-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.engagement-item .stat-icon {
+  font-size: 16px;
+  color: var(--cyan);
+  filter: drop-shadow(0 0 5px rgba(66,232,255,.35));
+}
+
+#likeCount {
+  color: #ff8ec3;
+  font-weight: 850;
+}
+
+#viewCount {
+  color: #8fefff;
+  font-weight: 850;
+}
+
+.like-button {
+  border: 1px solid rgba(255,62,157,.45);
+  border-radius: 30px;
+  padding: 9px 14px;
+  color: #fff;
+  background: linear-gradient(
+    120deg,
+    rgba(255,62,157,.17),
+    rgba(155,92,255,.18)
+  );
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease;
+  box-shadow: 0 4px 16px rgba(255,62,157,.08);
+}
+
+.like-button:active {
+  transform: scale(.95);
+}
+
+.like-button.liked {
+  background: linear-gradient(
+    120deg,
+    rgba(255,62,157,.38),
+    rgba(155,92,255,.3)
+  );
+  color: #ff8ec3;
+  border-color: rgba(255,142,195,.65);
+}
+
+.content {
+  padding: 19px 17px 17px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.3;
+  margin-bottom: 9px;
+  letter-spacing: -.3px;
+}
+
+.description {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+  margin-bottom: 17px;
+}
+
+.smartlink-btn {
+  display: block;
+  width: 100%;
+  padding: 15px 18px;
+  border-radius: 13px;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .5px;
+  background: linear-gradient(
+    110deg,
+    var(--pink),
+    var(--purple) 60%,
+    #5d7bff
+  );
+  box-shadow: 0 8px 28px rgba(155,92,255,.27);
+  transition: transform .15s ease, opacity .15s ease;
+}
+
+.smartlink-btn:active {
+  transform: scale(.97);
+  opacity: .9;
+}
+
+.content .video-native-ad {
+  margin: 16px 0 0;
+  background: linear-gradient(
+    145deg,
+    rgba(26,21,47,.98),
+    rgba(11,10,24,.98)
+  );
+}
+
+/* TRENDING */
+
+.trending {
+  position: relative;
+  margin: 18px 12px 0;
+  padding: 17px 16px;
+  border-radius: 17px;
+  background: linear-gradient(
+    130deg,
+    rgba(255,62,157,.09),
+    rgba(155,92,255,.10) 60%,
+    rgba(66,232,255,.05)
+  );
+  border: 1px solid rgba(180,143,255,.2);
+  overflow: hidden;
+}
+
+.trending:after {
+  content: "";
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  right: -30px;
+  top: -35px;
+  border-radius: 50%;
+  background: rgba(155,92,255,.14);
+  filter: blur(4px);
+}
+
+.trending-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: #ff7fba;
+  letter-spacing: .6px;
+  margin-bottom: 8px;
+}
+
+.trending-text {
+  position: relative;
+  z-index: 1;
+  font-size: 13px;
+  color: #d0cce0;
+  line-height: 1.6;
+}
+
+.footer {
+  padding: 25px 15px;
+  text-align: center;
+  color: #77718f;
+  font-size: 10px;
+  letter-spacing: .5px;
+}
+
+@media (max-width: 360px) {
+  .play-button {
+    width: 70px;
+    height: 70px;
+    font-size: 25px;
+  }
+
+  .engagement-bar {
+    padding: 11px;
+  }
+
+  .engagement-stats {
+    gap: 10px;
+    font-size: 11px;
+  }
+
+  .logo {
+    font-size: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      NextWatch<span>Vidio</span>
+    </div>
+  </div>
+
+  <!-- NATIVE BANNER: DI ATAS TRENDING -->
+  <div class="video-native-ad">
+    <div class="ads-label">ADVERTISEMENT</div>
+
+    <div>
+      <script
+        data-cfasync="false"
+        async
+        type="text/javascript"
+        src="https://qw.rolledipocras.com/tiTtAiKEeLuZ/151239">
+      </script>
+    </div>
+  </div>
+
+
+  <!-- TRENDING: POSISI KEDUA -->
+  <div class="trending">
+    <div class="trending-title">
+      🔥 TRENDING NOW
+    </div>
+
+    <div class="trending-text">
+      Don't miss the latest videos. Tap FULL VIDS to continue.
+    </div>
+  </div>
+
+  <div class="video-native-ad">
+        <div class="ads-label">ADVERTISEMENT</div>
+
+        <div id="native-ad-script-slot">
+          <script
+            data-cfasync="false"
+            async
+            type="text/javascript"
+            src="https://ju.bionomysolera.com/tKxL7nY316cl3r5/155722">
+          </script>
+        </div>
+      </div>
+
+  <!-- VIDEO CARD -->
+  <div class="video-card">
+
+    <!-- FOTO -->
+    <div class="photo-box">
+
+      <!-- LOADING -->
+      <div class="photo-loading" id="photoLoading">
+        <div class="loading-logo"></div>
+        <div class="loading-text">LOADING...</div>
+      </div>
+
+      <img
+        id="videoPoster"
+        src="https://cdn.aceimg.com/JdD1ljD9b.jpg"
+        alt="Full Vids"
+      >
+
+      <!-- TOMBOL PLAY -->
+      <a
+        class="play-overlay"
+        href="https://x-hubb.github.io/Badiesgirlhub/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Watch full video"
+      >
+        <span class="play-button" aria-hidden="true">▶</span>
+        <span class="play-hint">▶WATCH CLICK</span>
+      </a>
+
+    </div>
+
+    
+    </div>
+  </div>
+    <!-- LIKE & VIEWS -->
+    <div class="engagement-bar">
+      <div class="engagement-stats">
+
+        <div class="engagement-item">
+          <span class="stat-icon">👁</span>
+          <span id="viewCount">975.8K</span>
+          <span>views</span>
+        </div>
+
+        <div class="engagement-item">
+          <span class="stat-icon">♥</span>
+          <span id="likeCount">75.4K</span>
+          <span>likes</span>
+        </div>
+
+      </div>
+
+      <button
+        class="like-button"
+        id="likeButton"
+        type="button"
+        aria-pressed="false"
+      >
+        ♡ Like
+      </button>
+    </div>
+
+    <!-- VIDEO CONTENT -->
+    <div class="content">
+
+      <div class="title">
+        Watch the full video
+      </div>
+
+      <div class="description">
+        Tap the play icon on the photo to continue watching the full content.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    © 2026 NextWatchVidio
+  </div>
+
+</div>
+
+<!-- FOTO LOADING SCRIPT -->
+<script>
+(function () {
+  const poster = document.getElementById("videoPoster");
+  const loading = document.getElementById("photoLoading");
+
+  if (!poster) return;
+
+  poster.style.visibility = "hidden";
+
+  const loadingStartedAt = Date.now();
+
+  let imageReady = poster.complete && poster.naturalWidth > 0;
+  let minimumDelayPassed = false;
+  let revealed = false;
+
+  function revealPhotoWhenReady() {
+    if (revealed || !imageReady || !minimumDelayPassed) return;
+
+    revealed = true;
+    poster.style.visibility = "visible";
+
+    if (loading) {
+      loading.classList.add("hide");
+
+      setTimeout(function () {
+        loading.remove();
+      }, 300);
+    }
+  }
+
+  poster.addEventListener("load", function () {
+    imageReady = true;
+    revealPhotoWhenReady();
+  }, { once: true });
+
+  poster.addEventListener("error", function () {
+    imageReady = true;
+    revealPhotoWhenReady();
+  }, { once: true });
+
+  setTimeout(function () {
+    minimumDelayPassed = true;
+    revealPhotoWhenReady();
+  }, Math.max(0, 3000 - (Date.now() - loadingStartedAt)));
+
+  revealPhotoWhenReady();
+
+  poster.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+  });
+})();
+</script>
+
+<!-- LIKE & VIEWS CONFIG -->
+<script>
+(function () {
+  const INITIAL_VIEWS = 12800;
+  const INITIAL_LIKES = 2400;
+
+  const viewEl = document.getElementById("viewCount");
+  const likeEl = document.getElementById("likeCount");
+  const likeButton = document.getElementById("likeButton");
+
+  if (!viewEl || !likeEl || !likeButton) return;
+
+  let likes = INITIAL_LIKES;
+  let liked = false;
+
+  const formatCount = n => n >= 1000
+    ? (
+        n >= 10000
+          ? (n / 1000).toFixed(1).replace(/\.0$/, "")
+          : (n / 1000).toFixed(1)
+      ) + "K"
+    : String(n);
+
+  viewEl.textContent = formatCount(INITIAL_VIEWS);
+  likeEl.textContent = formatCount(likes);
+
+  likeButton.addEventListener("click", function () {
+    liked = !liked;
+    likes = INITIAL_LIKES + (liked ? 1 : 0);
+
+    likeEl.textContent = formatCount(likes);
+    likeButton.classList.toggle("liked", liked);
+    likeButton.setAttribute("aria-pressed", String(liked));
+    likeButton.textContent = liked ? "♥ Liked" : "♡ Like";
+  });
+})();
+</script>
+
+<!-- HISTATS COUNTER -->
+<script type="text/javascript">
+var _Hasync = _Hasync || [];
+
+_Hasync.push([
+  "Histats.start",
+  "1,5044778,4,0,0,0,00010000"
+]);
+
+_Hasync.push([
+  "Histats.fasi",
+  "1"
+]);
+
+_Hasync.push([
+  "Histats.track_hits",
+  ""
+]);
+
+(function () {
+  var hs = document.createElement("script");
+
+  hs.type = "text/javascript";
+  hs.async = true;
+  hs.src = "https://s10.histats.com/js15_as.js";
+
+  hs.onload = function () {
+    console.log("Histats script berhasil dimuat.");
+  };
+
+  hs.onerror = function () {
+    console.error("Histats gagal dimuat.");
+  };
+
+  (document.head || document.body).appendChild(hs);
+})();
+</script>
+
+<noscript>
+  <a
+    href="https://www.histats.com/"
+    target="_blank"
+    rel="noopener"
+  >
+    <img
+      src="https://sstatic1.histats.com/0.gif?5044778&101"
+      alt=""
+      border="0"
+    >
+  </a>
+</noscript>
+
+<!-- END HISTATS -->
+
+</body>
+</html>
